@@ -52,6 +52,7 @@ typedef std::vector<struct collision> collisions;
 */
 class pbd{
 	public:
+		void set_parameters(std::vector<double>&);
 		/*
 			This method does one "outer" iteration of the PBD algorithm
 			=> iter Iteration number

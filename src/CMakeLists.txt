@@ -8,11 +8,11 @@
 cmake_minimum_required(VERSION 2.8)
 project(simulation)
 
-find_package(VTK REQUIRED)
-#include(${VTK_USE_FILE})
+find_package(VTK 8.2.0 EXACT REQUIRED)
+include(${VTK_USE_FILE})
 # using GCC (simple and straigthforward ;))
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	set(CMAKE_CXX_FLAGS "-std=c++98 -pedantic-errors -Wall -Wextra -Werror -Wno-parentheses")
+	set(CMAKE_CXX_FLAGS "-std=c++11 -pedantic-errors -Wall -Wextra -Werror -Wno-parentheses")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fopenmp -Ofast -lm")
 # using visual c++ (notice how hard is it to setup and optimize this
 # piece of crap (MSVC) compared with GCC ;/)
@@ -46,4 +46,4 @@ add_executable(generator
 target_link_libraries(pbd ${VTK_LIBRARIES})
 target_link_libraries(generator ${VTK_LIBRARIES})
 #target_compile_definitions(pbd PRIVATE NO_HUD)
-vtk_module_autoinit(TARGETS pbd MODULES ${VTK_LIBRARIES})
+#vtk_module_autoinit(TARGETS pbd MODULES ${VTK_LIBRARIES})

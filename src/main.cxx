@@ -370,6 +370,7 @@ vtkSmartPointer<vtkAppendPolyData> parse_input(
 	std::vector<size_t>& len,
 	std::vector<size_t>& classes,
 	std::vector<size_t>& export_states,
+	std::vector<double>& parameters,
 	size_t& scenario,
 	size_t& fibres,
 	vtkSmartPointer<vtkAppendPolyData> fibres_append
@@ -382,6 +383,7 @@ vtkSmartPointer<vtkAppendPolyData> parse_input(
 	vtkNew<vtkAppendPolyData> append;
 	/* Next, we specify if we are in export argument or not */
 	bool export_state = false;
+	bool parameters_state = false;
 	/* At first, we iterate over all arguments */
 	for(int a=1; a<argc; a++){
 		/* If the argument defines muscle class */
@@ -420,8 +422,14 @@ vtkSmartPointer<vtkAppendPolyData> parse_input(
 			/* and nothing else is required */
 			continue;
 		}
+		if(!strcmp(argv[a],"--parameters")){
+			parameters_state=true;
+			continue;
+		}
+		if(parameters_state){
+			parameters.push_back(atof(argv[a]));
 		/* If we are selecting the scenario right now */
-		if(scenario_state){
+		}else if(scenario_state){
 			/* Next argument won't select scenario */
 			scenario_state=false;
 			/* And this scenario is parsed */
@@ -521,6 +529,23 @@ int main(int argc,char** argv){
 	/* and iteractor to window too */
 	renderWindowInteractor->SetRenderWindow(renderWindow);
 /* If we want to see HUD (sliders and top left text) */
+	/* We need vector, which contains number of points in each loaded model */
+	std::vector<size_t> len;
+	/* and a vector which contains number of models in each class
+		(muscles/bones etc.) */
+	std::vector<size_t> classes;
+	/* and then we save all frame indices, where screenshot should occur */
+	std::vector<size_t> export_states;
+	std::vector<double> parameters;
+	/* Next, we prepare variables for scenario ID and
+		number of fibres datasets */
+	size_t scenario=0,fibres=0;
+	/* At this point, we load all input data accoring to the parameters from
+		the command line */
+	vtkSmartPointer<vtkAppendPolyData> append = parse_input(
+		argc,argv,len,classes,export_states,parameters,scenario,fibres,fibres_append
+	);
+	pbd_algorithm->set_parameters(parameters);
 #ifndef NO_HUD
 	/* In this case we add annotation */
 	renderer->AddActor2D(textActor);
@@ -529,21 +554,6 @@ int main(int argc,char** argv){
 	/* and create them */
 	create_sliders(pbd_algorithm,renderWindowInteractor,s0,s1,s2,s3,s4,s5,s6);
 #endif
-	/* We need vector, which contains number of points in each loaded model */
-	std::vector<size_t> len;
-	/* and a vector which contains number of models in each class
-		(muscles/bones etc.) */
-	std::vector<size_t> classes;
-	/* and then we save all frame indices, where screenshot should occur */
-	std::vector<size_t> export_states;
-	/* Next, we prepare variables for scenario ID and
-		number of fibres datasets */
-	size_t scenario=0,fibres=0;
-	/* At this point, we load all input data accoring to the parameters from
-		the command line */
-	vtkSmartPointer<vtkAppendPolyData> append = parse_input(
-		argc,argv,len,classes,export_states,scenario,fibres,fibres_append
-	);
 	/* We need array, which will contain fibres position in doubles */
 	vtkNew<vtkDoubleArray> double_fibres;
 	/* If fibres has been loaded */
@@ -616,7 +626,7 @@ int main(int argc,char** argv){
 	/* We assign actor to the renderer */
 	renderer->AddActor(actor);
 	/* and it's background will be black (let's take care of our eyes) */
-	renderer->SetBackground(1,1,1);
+	renderer->SetBackground(0,0,0);
 	/* Next, we reset the camera position and angle, which calculates
 		optimal coordinates to fit everything on screen */
 	renderer->ResetCamera();

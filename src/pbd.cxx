@@ -735,6 +735,19 @@ void pbd::update_position(double* pos,point_3D& vertex){
 	memcpy(pos,work,sizeof(double)*POINT_DIM);	
 }
 
+void pbd::set_parameters(std::vector<double>& params){
+	double* arr[] = {
+		&m_time_diff,&m_damp,&m_bending,&m_pressure,
+		&m_constr,&m_gravity,&m_pause,&m_anisotropy
+	};
+	size_t len = sizeof(arr)/sizeof(arr[0]);
+	if(params.size()<len){
+		len=params.size();
+	}
+	for(size_t a=0; a<len; a++){
+		*(arr[a]) = params[a];	
+	}
+}
 /* CONSTRAINTS SECTION BEGINS - THERE ARE METHODS WHICH
 	SOLVES CONSTRAINTS OF SINGLE ELEMENTS */
 
